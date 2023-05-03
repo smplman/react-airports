@@ -1,33 +1,40 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import axios from 'axios'
 
 function App() {
-  const [count, setCount] = useState(0)
+  
+  const [icao, setIcao] = useState('KSDF')
+  const [airportData, setAirportData] = useState()
+  const apiUrl = `/api/v1/airports?apt=${icao}`
+
+  function handleAirportCodeChange (event) {
+    if (event?.target?.value) {
+      setIcao(event?.target.value)
+    }
+  }
+
+  async function getAirportData () {
+    axios.get(apiUrl)
+    .then((res) => {
+      console.log(res)
+      setAirportData(res.data);
+    })
+    .catch((e) => {
+      console.log('Error fetching airport data', e)
+    })
+  }
 
   return (
     <>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <input type="text" name="icao" value={icao} onChange={handleAirportCodeChange}/>
+        <button onClick={() => getAirportData()}>Search</button>
+        { !airportData
+          ? <p>Please enter an airport code to search for</p>
+          : <h1>{airportData?.[icao.toUpperCase()]?.[0]?.facility_name}</h1>
+        }
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
